@@ -1,10 +1,10 @@
 # Technology Market News Aggregator
 
-Daily monitor of technology market news and sentiment that automatically posts to WordPress.
+Daily monitor of technology market news and sentiment displayed in a Hacker News-style web interface.
 
 ## Overview
 
-This project fetches technology market news from the AlphaVantage API and automatically posts structured summaries to a WordPress blog. Each news article is formatted with summaries, ticker sentiment analysis, and source information.
+This project fetches technology market news from the AlphaVantage API, stores articles in a MySQL database, and displays them via a Flask web application with a minimalist Hacker News-inspired design. Each news article includes summaries, ticker sentiment analysis, and source information.
 
 ## Setup
 
@@ -17,66 +17,87 @@ This project fetches technology market news from the AlphaVantage API and automa
    ```bash
    cp .env.example .env
    ```
-   
+
    Then edit `.env` with your credentials:
    - `ALPHAVANTAGE_API_KEY`: Your AlphaVantage API key
-   - `WORDPRESS_URL`: Your WordPress site URL
-   - `WORDPRESS_USER`: WordPress username
-   - `WORDPRESS_PASSWORD`: WordPress Application Password
+   - Database credentials are already configured for the local MySQL setup
 
-3. **Generate WordPress Application Password:**
-   - Go to WordPress Admin → Users → Profile
-   - Scroll to "Application Passwords" section
-   - Enter application name and click "Add New Application Password"
-   - Copy the generated password to your `.env` file
+3. **Initialize database:**
+   ```bash
+   uv run python db_setup.py
+   ```
+
+   This creates two tables in the MySQL database:
+   - `market_news`: Stores article information
+   - `ticker_sentiments`: Stores ticker sentiment data
 
 ## Usage
 
-**Run manually:**
+**Fetch news articles (run manually):**
 ```bash
 uv run python marketnews.py
 ```
+
+**Start the Flask web application:**
+```bash
+uv run python app.py
+```
+
+Then visit:
+- `http://localhost:5000` (local access)
+- `http://192.168.1.18:5000` (network access)
 
 **Test AlphaVantage API:**
 ```bash
 uv run python sample.py
 ```
 
-**Schedule with cron (daily at noon):**
+**Automated daily execution:**
+The cron job runs daily at 10:00 AM EST:
 ```bash
-crontab -e
-# Add: 0 12 * * * cd /path/to/marketnews && uv run python marketnews.py
-```
-
-If the above doesn't work, then...
-
-```bash
-crontab -e
-# Add: * 12 * * * cd /path/to/marketnews && /path/to/marketnews/.venv/bin/python marketnews.py
+0 10 * * * cd /home/defcon/repos/marketnews && /home/defcon/repos/marketnews/.venv/bin/python marketnews.py
 ```
 
 ## Features
 
-- Fetches up to 50 technology news articles from AlphaVantage API
-- **Source filtering**: Automatically excludes articles from banned sources (currently "Motley Fool")
-- Creates WordPress posts with structured content:
-  - Article title
-  - Summary
-  - Ticker sentiment analysis (with scores and relevance)
-  - Source and publication information
+- **News Aggregation**: Fetches up to 50 technology news articles from AlphaVantage API daily
+- **Source Filtering**: Automatically excludes articles from banned sources (currently "Motley Fool")
+- **MySQL Storage**: Stores articles and ticker sentiments in structured database tables
+- **Hacker News-Style UI**: Clean, minimalist web interface inspired by Hacker News
+  - Orange header bar (#ff6600)
+  - Numbered article list
+  - Time ago display (e.g., "2 hours ago")
+  - Clickable ticker symbols
+- **Search Functionality**: Search articles by ticker symbol
+- **Article Details**: Full article view with:
+  - Complete summary
+  - Ticker sentiment table with scores and relevance
   - Link to original article
-- Handles self-signed SSL certificates
-- Comprehensive logging for monitoring
-- Error handling and retry logic
+- **Pagination**: 30 articles per page with "More" navigation
+- **Comprehensive Logging**: Full logging for monitoring and debugging
+- **Error Handling**: Robust error recovery for API failures
 
 ## Files
 
-- **`marketnews.py`**: Main program for automated news aggregation
+- **`marketnews.py`**: Main program for fetching news and storing in MySQL
+- **`app.py`**: Flask web application with Hacker News-style interface
+- **`db_setup.py`**: Database initialization script
 - **`sample.py`**: Test script for AlphaVantage API integration
+- **`templates/`**: Flask HTML templates (layout, index, article detail)
+- **`static/`**: CSS stylesheets (Hacker News-inspired design)
 - **`.env.example`**: Template for environment configuration
 - **`pyproject.toml`**: Python dependencies managed by uv
+
+## Database Schema
+
+**market_news table:**
+- `id`, `title`, `summary`, `url`, `source`, `published_time`, `created_at`
+
+**ticker_sentiments table:**
+- `id`, `article_id`, `ticker`, `sentiment_label`, `sentiment_score`, `relevance_score`
 
 ## References
 
 - [AlphaVantage API Documentation](https://www.alphavantage.co/documentation/)
-- [WordPress REST API Documentation](https://developer.wordpress.org/rest-api/)
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [Hacker News](https://news.ycombinator.com/)

@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block title %}Market News{% endblock %}
+
+{% block content %}
+<table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+    {% if search_query %}
+    <tr style="height:30px">
+        <td colspan="2">
+            <span class="pagetop">
+                Searching for: <b>{{ search_query }}</b> |
+                <a href="/">clear</a>
+            </span>
+        </td>
+    </tr>
+    {% else %}
+    <tr style="height:20px">
+        <td colspan="2">
+            <form method="get" action="/" style="margin:0;padding:0;">
+                <span class="pagetop">
+                    Search by ticker:
+                    <input type="text" name="q" value="" size="20" style="margin-left:5px;">
+                    <input type="submit" value="Search" style="margin-left:5px;">
+                </span>
+            </form>
+        </td>
+    </tr>
+    {% endif %}
+    <tr style="height:5px"></tr>
+    {% for article in articles %}
+    <tr class="athing" id="article-{{ article.id }}">
+        <td align="right" valign="top" class="title">
+            <span class="rank">{{ loop.index + ((page - 1) * 30) }}.</span>
+        </td>
+        <td class="title">
+            <span class="titleline">
+                <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                <span class="sitebit comhead">
+                    (<span class="sitestr">{{ article.source }}</span>)
+                </span>
+            </span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td class="subtext">
+            <span class="subline">
+                <span class="age" title="{{ article.created_at }}">
+                    {{ article.created_at|timeago }}
+                </span>
+                {% if article.tickers %}
+                | tickers:
+                {% for ticker in article.tickers %}
+                    <a href="/?q={{ ticker }}">{{ ticker }}</a>{% if not loop.last %},{% endif %}
+                {% endfor %}
+                {% endif %}
+                | <a href="/article/{{ article.id }}">details</a>
+            </span>
+        </td>
+    </tr>
+    <tr class="spacer" style="height:5px"></tr>
+    {% endfor %}
+
+    {% if articles|length == 30 %}
+    <tr>
+        <td colspan="2" style="padding-top:10px;">
+            <span class="pagetop">
+                <a href="/?page={{ page + 1 }}{% if search_query %}&q={{ search_query }}{% endif %}">More</a>
+            </span>
+        </td>
+    </tr>
+    {% endif %}
+</table>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ article.title }} | Market News{% endblock %}
+
+{% block content %}
+<table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+    <tr>
+        <td>
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr class="athing">
+                    <td class="title">
+                        <span class="titleline">
+                            <a href="{{ article.url }}" target="_blank">{{ article.title }}</a>
+                            <span class="sitebit comhead">
+                                (<span class="sitestr">{{ article.source }}</span>)
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="subtext">
+                        <span class="age" title="{{ article.created_at }}">
+                            {{ article.created_at|timeago }}
+                        </span>
+                        | Published: {{ article.published_time }}
+                        | <a href="/">back to list</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr style="height:20px"></tr>
+    <tr>
+        <td>
+            <div class="comment" style="margin-left:0;">
+                <div class="commtext">
+                    <p><strong>Summary:</strong></p>
+                    <p>{{ article.summary }}</p>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% if article.tickers %}
+    <tr style="height:20px"></tr>
+    <tr>
+        <td>
+            <div class="comment" style="margin-left:0;">
+                <div class="commtext">
+                    <p><strong>Ticker Sentiments:</strong></p>
+                    <table border="0" cellpadding="4" cellspacing="0" style="margin-top:5px;">
+                        <tr style="background-color:#f6f6ef;">
+                            <th align="left">Ticker</th>
+                            <th align="left">Sentiment</th>
+                            <th align="right">Score</th>
+                            <th align="right">Relevance</th>
+                        </tr>
+                        {% for ticker in article.tickers %}
+                        <tr {% if loop.index % 2 == 0 %}style="background-color:#f6f6ef;"{% endif %}>
+                            <td>
+                                <a href="/?q={{ ticker.ticker }}">{{ ticker.ticker }}</a>
+                            </td>
+                            <td>{{ ticker.sentiment_label }}</td>
+                            <td align="right">{{ "%.3f"|format(ticker.sentiment_score) }}</td>
+                            <td align="right">{{ "%.3f"|format(ticker.relevance_score) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endif %}
+    <tr style="height:20px"></tr>
+    <tr>
+        <td>
+            <span class="subtext">
+                <a href="{{ article.url }}" target="_blank">Read original article →</a>
+            </span>
+        </td>
+    </tr>
+</table>
+{% endblock %}
