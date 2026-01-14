@@ -4,9 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python project for monitoring technology market news and sentiment using the AlphaVantage API. News articles are stored in a MySQL database and displayed via a Hacker News-style Flask web application. The system runs via cron to fetch news daily.
+This is a fully Dockerized Python project for monitoring technology market news and sentiment using the AlphaVantage API. News articles are stored in a MySQL database and displayed via a Hacker News-style Flask web application. The entire system runs in Docker containers with cron-based automation for daily news fetching.
 
 ## Development Setup
+
+This project runs in Docker containers. Docker Compose manages the MySQL database and Flask web application.
+
+**Prerequisites:**
+- Docker and Docker Compose installed
+- `.env` file configured with API key
+
+**Start the application:**
+```bash
+docker compose up -d
+```
+
+**Initialize database (first time only):**
+```bash
+docker exec marketnews-web uv run python db_setup.py
+```
+
+**Fetch news articles manually:**
+```bash
+docker exec marketnews-web uv run python marketnews.py
+```
+
+**View logs:**
+```bash
+docker logs marketnews-web
+docker logs marketnews-db
+```
+
+**Stop the application:**
+```bash
+docker compose down
+```
+
+### Local Development (without Docker)
 
 This project uses `uv` as the package manager. Dependencies are managed in `pyproject.toml`.
 
@@ -20,43 +54,51 @@ uv sync
 uv run python sample.py
 ```
 
-**Run the main program (fetch and store news):**
-```bash
-uv run python marketnews.py
-```
-
-**Run the Flask web application:**
+**Run locally (requires MySQL on port 3307):**
 ```bash
 uv run python app.py
-```
-
-**Initialize database tables:**
-```bash
-uv run python db_setup.py
 ```
 
 ## Environment Configuration
 
 Copy `.env.example` to `.env` and configure:
 - `ALPHAVANTAGE_API_KEY`: API key for AlphaVantage news and sentiment data
-- Database credentials are hardcoded to match the docker-compose WordPress MySQL setup (localhost:3306, user: wordpress)
+- Database configuration (automatically set by Docker Compose):
+  - `DB_HOST`: localhost (or 'db' inside Docker)
+  - `DB_PORT`: 3307 (mapped from container's 3306)
+  - `DB_NAME`: marketnews
+  - `DB_USER`: marketnews
+  - `DB_PASSWORD`: marketnews_pass
 
 ## Core Architecture
 
+### Docker Services
+- **marketnews-db**: MySQL 8.0 database container (port 3307)
+- **marketnews-web**: Flask web application with Gunicorn (port 5000)
+
+### Python Files
 - **sample.py**: Working example that demonstrates AlphaVantage API integration for technology news sentiment
 - **marketnews.py**: Main program that fetches technology news and stores in MySQL database
 - **app.py**: Flask web application that displays news in a Hacker News-style interface
 - **db_setup.py**: Database initialization script for creating necessary tables
 - **MarketNewsAggregator class**: Handles API integration, data formatting, and MySQL storage
 
+### Docker Files
+- **Dockerfile**: Builds Flask application container (Python 3.13 + uv + gunicorn)
+- **docker-compose.yml**: Orchestrates MySQL and Flask services
+- **.dockerignore**: Excludes unnecessary files from Docker build
+
 ## Implementation Details
 
-- **Database**: MySQL database shared with WordPress docker container (localhost:3306)
+- **Containerization**: Fully Dockerized with Docker Compose orchestration
+- **Database**: Standalone MySQL 8.0 database (separate from WordPress, port 3307)
+- **Web Server**: Gunicorn WSGI server with 4 workers for production-grade Flask serving
 - **Data Storage**: Two tables - `market_news` (articles) and `ticker_sentiments` (sentiment data)
 - **Data Processing**: Converts string values to floats for sentiment scores and relevance formatting
 - **Error Handling**: Comprehensive logging and error recovery for API failures
 - **Source Filtering**: Articles from banned sources (currently "Motley Fool") are automatically filtered out before processing
 - **Web Interface**: Flask application with Hacker News-inspired minimalist design
+- **Environment Variables**: All database credentials configured via environment variables
 
 ## Database Schema
 
@@ -87,30 +129,52 @@ Copy `.env.example` to `.env` and configure:
 
 ## Development Commands
 
+**Build and start Docker containers:**
+```bash
+docker compose build
+docker compose up -d
+```
+
 **Initialize database (first time setup):**
 ```bash
-uv run python db_setup.py
+docker exec marketnews-web uv run python db_setup.py
 ```
 
-**Test AlphaVantage API response:**
+**Fetch news articles manually:**
+```bash
+docker exec marketnews-web uv run python marketnews.py
+```
+
+**View application logs:**
+```bash
+docker logs -f marketnews-web
+```
+
+**Access database:**
+```bash
+docker exec marketnews-db mysql -u marketnews -pmarketnews_pass marketnews
+```
+
+**Restart services:**
+```bash
+docker compose restart
+```
+
+**Stop and remove containers:**
+```bash
+docker compose down
+# Or remove volumes too:
+docker compose down -v
+```
+
+**Cron setup for daily execution (10:00 AM EST):**
+```bash
+0 10 * * * docker exec marketnews-web uv run python marketnews.py >> /home/defcon/logs/marketnews.log 2>&1
+```
+
+**Test AlphaVantage API (local):**
 ```bash
 uv run python sample.py
-```
-
-**Run news aggregation (fetch and store articles):**
-```bash
-uv run python marketnews.py
-```
-
-**Start Flask web application:**
-```bash
-uv run python app.py
-# Access at http://localhost:5000 or http://192.168.1.18:5000
-```
-
-**Cron setup for daily execution (currently 10:00 AM):**
-```bash
-0 10 * * * cd /home/defcon/repos/marketnews && /home/defcon/repos/marketnews/.venv/bin/python marketnews.py
 ```
 
 ## API Reference

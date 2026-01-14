@@ -22,13 +22,13 @@ def get_db_connection():
     """Create and return MySQL database connection."""
     load_dotenv()
 
-    # Get credentials from docker-compose setup
+    # Get credentials from environment variables
     connection = mysql.connector.connect(
-        host='localhost',
-        port=3306,
-        user='wordpress',
-        password='my_wordpress_db_password',
-        database='wordpress'
+        host=os.getenv('DB_HOST', 'localhost'),
+        port=int(os.getenv('DB_PORT', 3307)),
+        user=os.getenv('DB_USER', 'marketnews'),
+        password=os.getenv('DB_PASSWORD', 'marketnews_pass'),
+        database=os.getenv('DB_NAME', 'marketnews')
     )
 
     return connection
