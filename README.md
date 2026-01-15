@@ -81,14 +81,7 @@ docker compose down -v
 
 The cron job runs daily at 10:00 AM EST:
 ```bash
-0 10 * * * docker exec marketnews-web uv run python marketnews.py >> /home/defcon/logs/marketnews.log 2>&1
-```
-
-### Testing (Local Development)
-
-**Test AlphaVantage API:**
-```bash
-uv run python sample.py
+0 10 * * * docker exec marketnews-web uv run python marketnews.py
 ```
 
 ## Features
@@ -126,7 +119,6 @@ uv run python sample.py
 - **`marketnews.py`**: Main program for fetching news and storing in MySQL
 - **`app.py`**: Flask web application with Hacker News-style interface
 - **`db_setup.py`**: Database initialization script
-- **`sample.py`**: Test script for AlphaVantage API integration
 
 ### Docker Configuration
 - **`Dockerfile`**: Container image definition (Python 3.13 + uv + gunicorn)

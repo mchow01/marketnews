@@ -49,11 +49,6 @@ This project uses `uv` as the package manager. Dependencies are managed in `pypr
 uv sync
 ```
 
-**Run the sample script:**
-```bash
-uv run python sample.py
-```
-
 **Run locally (requires MySQL on port 3307):**
 ```bash
 uv run python app.py
@@ -77,7 +72,6 @@ Copy `.env.example` to `.env` and configure:
 - **marketnews-web**: Flask web application with Gunicorn (port 5000)
 
 ### Python Files
-- **sample.py**: Working example that demonstrates AlphaVantage API integration for technology news sentiment
 - **marketnews.py**: Main program that fetches technology news and stores in MySQL database
 - **app.py**: Flask web application that displays news in a Hacker News-style interface
 - **db_setup.py**: Database initialization script for creating necessary tables
@@ -169,12 +163,7 @@ docker compose down -v
 
 **Cron setup for daily execution (10:00 AM EST):**
 ```bash
-0 10 * * * docker exec marketnews-web uv run python marketnews.py >> /home/defcon/logs/marketnews.log 2>&1
-```
-
-**Test AlphaVantage API (local):**
-```bash
-uv run python sample.py
+0 10 * * * docker exec marketnews-web uv run python marketnews.py
 ```
 
 ## API Reference
