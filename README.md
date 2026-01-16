@@ -2,7 +2,7 @@
 
 Daily monitor of technology market news and sentiment displayed in a Hacker News-style web interface. Fully Dockerized for easy deployment.
 
-![Market News Screenshot](screenshot.jpg)
+<img src="screenshot.jpg" alt="Market News Screenshot" width="50%">
 
 ## Overview
 
