@@ -41,7 +41,7 @@ This project fetches technology market news from the AlphaVantage API, stores ar
 
 4. **Access the application:**
    - Web interface: http://localhost:5000
-   - Network access: http://192.168.1.18:5000
+   - Network access: http://LOCAL_IP:5000
 
 ## Usage
 
