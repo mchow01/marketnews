@@ -2,6 +2,8 @@
 
 Daily monitor of technology market news and sentiment displayed in a Hacker News-style web interface. Fully Dockerized for easy deployment.
 
+![Market News Screenshot](screenshot.jpg)
+
 ## Overview
 
 This project fetches technology market news from the AlphaVantage API, stores articles in a MySQL database, and displays them via a Flask web application with a minimalist Hacker News-inspired design. The entire system runs in Docker containers with Gunicorn serving the Flask app for production use.
