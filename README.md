@@ -79,6 +79,18 @@ docker compose down
 docker compose down -v
 ```
 
+### Database Backup and Restore
+
+**Backup the database:**
+```bash
+docker exec marketnews-db mysqldump -u marketnews -pmarketnews_pass marketnews > marketnews_backup_$(date +%Y%m%d_%H%M%S).sql
+```
+
+**Restore from a backup:**
+```bash
+docker exec -i marketnews-db mysql -u marketnews -pmarketnews_pass marketnews < marketnews_backup_YYYYMMDD_HHMMSS.sql
+```
+
 ### Automated Daily Execution
 
 The cron job runs daily at 10:00 AM EST:
