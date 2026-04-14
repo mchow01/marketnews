@@ -16,4 +16,4 @@ wheels/
 .env
 
 # Data
-.sql
+*.sql
