@@ -133,6 +133,7 @@ The cron job runs daily at 10:00 AM EST:
 - **`marketnews.py`**: Main program for fetching news and storing in MySQL
 - **`app.py`**: Flask web application with Hacker News-style interface
 - **`db_setup.py`**: Database initialization script
+- **`mcp_server.py`**: MCP server for querying the database via Claude Code
 
 ### Docker Configuration
 - **`Dockerfile`**: Container image definition (Python 3.13 + uv + gunicorn)
@@ -182,6 +183,25 @@ The cron job runs daily at 10:00 AM EST:
 │     (code)            (db_data)             │
 └─────────────────────────────────────────────┘
 ```
+
+## MCP Server
+
+`mcp_server.py` exposes the marketnews database as an MCP server for use with Claude Code, enabling natural language queries over articles and sentiment data without writing SQL.
+
+**Register with Claude Code:**
+```bash
+claude mcp add marketnews -- uv run --project /path/to/marketnews python /path/to/marketnews/mcp_server.py
+```
+
+**Available tools:**
+
+| Tool | Description |
+|------|-------------|
+| `search_articles` | Search by keyword, ticker, source, and/or date range |
+| `get_article` | Fetch a single article with full summary and ticker sentiments |
+| `get_sentiment_report` | Tickers ranked by average sentiment score |
+| `get_top_tickers` | Tickers ranked by total mentions or average sentiment score |
+| `get_daily_summary` | Article count, top sources, and top tickers for a given date |
 
 ## References
 

@@ -75,6 +75,7 @@ Copy `.env.example` to `.env` and configure:
 - **marketnews.py**: Main program that fetches technology news and stores in MySQL database
 - **app.py**: Flask web application that displays news in a Hacker News-style interface
 - **db_setup.py**: Database initialization script for creating necessary tables
+- **mcp_server.py**: MCP server exposing the marketnews database as tools for Claude Code
 - **MarketNewsAggregator class**: Handles API integration, data formatting, and MySQL storage
 
 ### Docker Files
@@ -166,7 +167,29 @@ docker compose down -v
 0 10 * * * docker exec marketnews-web uv run python marketnews.py
 ```
 
+## MCP Server
+
+`mcp_server.py` exposes the marketnews database as an MCP server for use with Claude Code. It runs locally and connects to the MySQL database on port 3307.
+
+**Run the MCP server:**
+```bash
+uv run python mcp_server.py
+```
+
+**Register with Claude Code (already done for this project):**
+```bash
+claude mcp add marketnews -- uv run --project /path/to/marketnews python /path/to/marketnews/mcp_server.py
+```
+
+**Available tools:**
+- `search_articles` — search by keyword, ticker, source, and/or date range
+- `get_article` — fetch a single article with full summary and ticker sentiments by ID
+- `get_sentiment_report` — tickers ranked by average sentiment score, filterable by date and label
+- `get_top_tickers` — tickers ranked by total mentions or average sentiment score
+- `get_daily_summary` — article count, top sources, and top tickers for a given date
+
 ## API Reference
 
 - AlphaVantage NEWS_SENTIMENT function: https://www.alphavantage.co/documentation/
 - Flask documentation: https://flask.palletsprojects.com/
+- MCP documentation: https://modelcontextprotocol.io/
