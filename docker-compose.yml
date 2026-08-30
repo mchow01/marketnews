@@ -33,7 +33,7 @@ services:
       DB_PASSWORD: marketnews_pass
       ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - .:/app
     restart: always
