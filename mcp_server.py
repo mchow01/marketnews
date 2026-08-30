@@ -10,7 +10,11 @@ import os
 
 load_dotenv()
 
-mcp = FastMCP("marketnews")
+MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "stdio")
+MCP_HOST = os.getenv("MCP_HOST", "127.0.0.1")
+MCP_PORT = int(os.getenv("MCP_PORT", "9001"))
+
+mcp = FastMCP("marketnews", host=MCP_HOST, port=MCP_PORT)
 
 
 def get_connection():
@@ -270,4 +274,4 @@ def get_daily_summary(date: str) -> dict:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    mcp.run(transport=MCP_TRANSPORT)

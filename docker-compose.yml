@@ -38,5 +38,27 @@ services:
       - .:/app
     restart: always
 
+  mcp:
+    build: .
+    container_name: marketnews-mcp
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: marketnews
+      DB_USER: marketnews
+      DB_PASSWORD: marketnews_pass
+      MCP_TRANSPORT: streamable-http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: 9001
+    ports:
+      - "9001:9001"
+    volumes:
+      - .:/app
+    command: ["uv", "run", "python", "mcp_server.py"]
+    restart: always
+
 volumes:
   marketnews_db_data:

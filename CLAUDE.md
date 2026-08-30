@@ -70,6 +70,7 @@ Copy `.env.example` to `.env` and configure:
 ### Docker Services
 - **marketnews-db**: MySQL 8.0 database container (port 3307)
 - **marketnews-web**: Flask web application with Gunicorn (port 5000)
+- **marketnews-mcp**: MCP server exposed over streamable-http (port 9001), for non-stdio clients like Hermes Agent
 
 ### Python Files
 - **marketnews.py**: Main program that fetches technology news and stores in MySQL database
@@ -169,9 +170,12 @@ docker compose down -v
 
 ## MCP Server
 
-`mcp_server.py` exposes the marketnews database as an MCP server for use with Claude Code. It runs locally and connects to the MySQL database on port 3307.
+`mcp_server.py` exposes the marketnews database as an MCP server. Transport is controlled by env vars (default: stdio for local/Claude Code use):
+- `MCP_TRANSPORT`: `stdio` (default), `sse`, or `streamable-http`
+- `MCP_HOST`: bind host for HTTP transports (default `127.0.0.1`)
+- `MCP_PORT`: bind port for HTTP transports (default `9001`)
 
-**Run the MCP server:**
+**Run the MCP server locally (stdio, connects to MySQL on port 3307):**
 ```bash
 uv run python mcp_server.py
 ```
@@ -180,6 +184,14 @@ uv run python mcp_server.py
 ```bash
 claude mcp add marketnews -- uv run --project /path/to/marketnews python /path/to/marketnews/mcp_server.py
 ```
+
+**Docker (streamable-http, for non-stdio clients like Hermes Agent):**
+
+The `mcp` service in `docker-compose.yml` runs `mcp_server.py` with `MCP_TRANSPORT=streamable-http`, publishing port 9001. Start it with `docker compose up -d mcp` (it depends on `db`). From another Docker container on the same host (e.g. Hermes Agent in its own compose stack), point the client at:
+```
+http://host.docker.internal:9001/mcp
+```
+(On Linux hosts without Docker Desktop, use the host's LAN IP instead of `host.docker.internal`, or add `extra_hosts: ["host.docker.internal:host-gateway"]` to the Hermes service.)
 
 **Available tools:**
 - `search_articles` — search by keyword, ticker, source, and/or date range
