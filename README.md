@@ -137,7 +137,7 @@ The cron job runs daily at 10:00 AM EST:
 
 ### Docker Configuration
 - **`Dockerfile`**: Container image definition (Python 3.13 + uv + gunicorn)
-- **`docker-compose.yml`**: Multi-container orchestration (MySQL + Flask)
+- **`docker-compose.yml`**: Multi-container orchestration (MySQL + Flask + MCP server)
 - **`.dockerignore`**: Files excluded from Docker build
 
 ### Web Assets
@@ -176,7 +176,14 @@ The cron job runs daily at 10:00 AM EST:
 │  │                 │  │                 │  │
 │  │ Flask + Gunicorn│──│ MySQL 8.0       │  │
 │  │ Port 5000       │  │ Port 3307       │  │
-│  └─────────────────┘  └─────────────────┘  │
+│  └─────────────────┘  └────────┬────────┘  │
+│                                 │            │
+│                        ┌────────┴────────┐  │
+│                        │ marketnews-mcp  │  │
+│                        │                 │  │
+│                        │ MCP (streamable-│  │
+│                        │ http), Port 9001│  │
+│                        └─────────────────┘  │
 │         │                      │            │
 │         │                      │            │
 │      Volume               Volume            │
@@ -186,12 +193,25 @@ The cron job runs daily at 10:00 AM EST:
 
 ## MCP Server
 
-`mcp_server.py` exposes the marketnews database as an MCP server for use with Claude Code, enabling natural language queries over articles and sentiment data without writing SQL.
+`mcp_server.py` exposes the marketnews database as an MCP server, enabling natural language queries over articles and sentiment data without writing SQL. Transport is controlled by env vars: `MCP_TRANSPORT` (`stdio` default, or `sse`/`streamable-http`), `MCP_HOST`, and `MCP_PORT` (default `9001`).
 
-**Register with Claude Code:**
+**Register with Claude Code (stdio):**
 ```bash
 claude mcp add marketnews -- uv run --project /path/to/marketnews python /path/to/marketnews/mcp_server.py
 ```
+
+**Docker (streamable-http, for non-stdio clients like Hermes Agent):**
+
+The `mcp` service in `docker-compose.yml` runs with `MCP_TRANSPORT=streamable-http`, publishing port 9001:
+```bash
+docker compose up -d mcp
+```
+
+From another Docker container on the same host, point the client at:
+```
+http://host.docker.internal:9001/mcp
+```
+(On Linux hosts without Docker Desktop, use the host's LAN IP instead of `host.docker.internal`, or add `extra_hosts: ["host.docker.internal:host-gateway"]` to the client's service.)
 
 **Available tools:**
 
